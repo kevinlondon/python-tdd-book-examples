@@ -16,16 +16,24 @@ class NewVisitorTest(unittest.TestCase):
 
         # She notices page title and header mentions to-do lists
         assert 'To-Do' in self.browser.title
-        self.fail("tbd")
 
         # She is invited to enter a to-do item.
-        #
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        assert inputbox.get_attribute("placeholder") == "Enter a to-do item"
+
         # She types "Buy peacock feathers" into a text box.
-        #
+        inputbox.send_keys("Buy peacock feathers")
+
         # When she hits enter, the page updates and lists "1: Buy peacock feathers."
-        #
+        inputbox.send_keys(Keys.ENTER)
+        table = self.browser.find_element_by_id("id_list_table")
+        rows = table.find_elements_by_tag_name("tr")
+        assert any(row.text == "1: Buy peacock feathers" for row in rows)
+
         # There is still a text box that invites her to add another item.
         # She enters "Use peacock feathers to make a fly."
+        fail("Finish the test.")
+
         #
         # The page updates again and shows both items on her list.
         #
