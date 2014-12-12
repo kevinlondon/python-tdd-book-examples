@@ -16,4 +16,4 @@ class HomePageTest(TestCase):
         response = home_page(request)
         assert response.content.startswith(b"<html>")
         assert b"<title>To-Do lists</title>" in response.content
-        assert response.content.endswith(b"</html>")
+        assert response.content.strip().endswith(b"</html>")
