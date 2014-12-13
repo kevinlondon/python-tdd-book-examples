@@ -11,6 +11,11 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        assert row_text in [row.text for row in rows]
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Edit heard about a new online todo app. She goes to check out the homepage.
         self.browser.get("http://localhost:8000")
@@ -29,22 +34,18 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         table = self.browser.find_element_by_id("id_list_table")
         rows = table.find_elements_by_tag_name("tr")
-        assert "1: Buy peacock feathers" in [row.text for row in rows], \
-            "New to-do item did not appear in table: %s" % table.text
+        self.check_for_row_in_list_table("1: Buy peacock feathers")
 
         # There is still a text box that invites her to add another item.
         # She enters "Use peacock feathers to make a fly."
         inputbox = self.browser.find_element_by_id('id_new_item')
-        sample_text = "Use peacock feathers to make a fly."
-        inputbox.send_keys(sample_text)
+        make_fly_text = "Use peacock feathers to make a fly."
+        inputbox.send_keys(make_fly_text)
         inputbox.send_keys(Keys.ENTER)
 
         # The page updates again and shows both items on her list.
-        table = self.browser.find_element_by_id("id_list_table")
-        rows = table.find_elements_by_tag_name("tr")
-        rowtext = [row.text for row in rows]
-        assert "1: Buy peacock feathers" in rowtext
-        assert "2: {0}".format(sample_text) in rowtext
+        self.check_for_row_in_list_table("1: Buy peacock feathers")
+        self.check_for_row_in_list_table("2: {0}".format(make_fly_text))
 
         self.fail("tbd")
         #
