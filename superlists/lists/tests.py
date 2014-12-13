@@ -22,15 +22,40 @@ class HomePageTest(TestCase):
     def test_home_page_can_save_a_POST_request(self):
         request = HttpRequest()
         request.method = "POST"
-        request.POST["item_text"] = "A new list item"
-        response = home_page(request)
-        assert "A new list item" in response.content.decode()
+        new_item_text = "A new list item"
+        request.POST["item_text"] = new_item_text
 
-        expected_html = render_to_string(
-            "home.html",
-            {"new_item_text": "A new list item"}
-        )
-        assert response.content.decode() == expected_html
+        response = home_page(request)
+
+        assert Item.objects.count() == 1
+        new_item = Item.objects.first()
+        assert new_item.text == new_item_text
+
+    def test_home_page_redirects_after_POST(self):
+        request = HttpRequest()
+        request.method = "POST"
+        request.POST['item_text'] = "A new list item"
+
+        response = home_page(request)
+
+        assert response.status_code == 302
+        assert response['Location'] == "/"
+
+    def test_home_page_only_saves_items_when_necessary(self):
+        request = HttpRequest()
+        home_page(request)
+        assert Item.objects.count() == 0
+
+    def test_home_page_displays_all_list_items(self):
+        Item.objects.create(text="item1")
+        Item.objects.create(text="item2")
+
+        request = HttpRequest()
+        response = home_page(request)
+
+        content = response.content.decode()
+        assert "item1" in content
+        assert "item2" in content
 
 
 class ItemModelTest(TestCase):
