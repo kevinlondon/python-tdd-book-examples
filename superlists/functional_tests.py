@@ -29,14 +29,24 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         table = self.browser.find_element_by_id("id_list_table")
         rows = table.find_elements_by_tag_name("tr")
-        assert any(row.text == "1: Buy peacock feathers" for row in rows)
+        assert "1: Buy peacock feathers" in [row.text for row in rows], \
+            "New to-do item did not appear in table: %s" % table.text
 
         # There is still a text box that invites her to add another item.
         # She enters "Use peacock feathers to make a fly."
-        fail("Finish the test.")
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        sample_text = "Use peacock feathers to make a fly."
+        inputbox.send_keys(sample_text)
+        inputbox.send_keys(Keys.ENTER)
 
-        #
         # The page updates again and shows both items on her list.
+        table = self.browser.find_element_by_id("id_list_table")
+        rows = table.find_elements_by_tag_name("tr")
+        rowtext = [row.text for row in rows]
+        assert "1: Buy peacock feathers" in rowtext
+        assert "2: {0}".format(sample_text) in rowtext
+
+        self.fail("tbd")
         #
         # Edith wonders if the site will remember her list. She sees a unique URL
         # for the todo items she has enters and some associated text explaining it.
