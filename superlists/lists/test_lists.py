@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 
 from lists.views import home_page
-from lists.models import Item
+from lists.models import Item, List
 
 
 class HomePageTest(TestCase):
@@ -27,8 +27,9 @@ class ListViewTest(TestCase):
         self.assertTemplateUsed(response, 'list.html')
 
     def test_displays_all_items(self):
-        Item.objects.create(text="item1")
-        Item.objects.create(text="item2")
+        lst = List.objects.create()
+        Item.objects.create(text="item1", list=lst)
+        Item.objects.create(text="item2", list=lst)
 
         response = self.client.get("/lists/the-only-list-in-the-world/")
 
@@ -53,14 +54,23 @@ class NewListTest(TestCase):
         self.assertRedirects(response, '/lists/the-only-list-in-the-world/')
 
 
-class ItemModelTest(TestCase):
+class ListAndItemModelsTest(TestCase):
 
     def test_saving_and_retrieving_items(self):
+        lst = List()
+        lst.save()
+
         first_text = "The first (ever) list item"
         second_text = "Item the second"
-        first_item = Item.objects.create(text=first_text)
-        second_item = Item.objects.create(text=second_text)
+        first_item = Item.objects.create(text=first_text, list=lst)
+        second_item = Item.objects.create(text=second_text, list=lst)
+
+        saved_list = List.objects.first()
+        assert saved_list == lst
+
         saved_items = Item.objects.all()
         assert saved_items.count() == 2
         assert saved_items[0].text == first_text
+        assert saved_items[0].list == lst
         assert saved_items[1].text == second_text
+        assert saved_items[1].list == lst
