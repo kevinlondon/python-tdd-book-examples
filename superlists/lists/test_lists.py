@@ -39,23 +39,28 @@ class HomePageTest(TestCase):
         response = home_page(request)
 
         assert response.status_code == 302
-        assert response['Location'] == "/"
+        assert response['Location'] == "/lists/the-only-list-in-the-world/"
 
     def test_home_page_only_saves_items_when_necessary(self):
         request = HttpRequest()
         home_page(request)
         assert Item.objects.count() == 0
 
-    def test_home_page_displays_all_list_items(self):
+
+class ListViewTest(TestCase):
+
+    def test_uses_list_template(self):
+        response = self.client.get("/lists/the-only-list-in-the-world/")
+        self.assertTemplateUsed(response, 'list.html')
+
+    def test_displays_all_items(self):
         Item.objects.create(text="item1")
         Item.objects.create(text="item2")
 
-        request = HttpRequest()
-        response = home_page(request)
+        response = self.client.get("/lists/the-only-list-in-the-world/")
 
-        content = response.content.decode()
-        assert "item1" in content
-        assert "item2" in content
+        self.assertContains(response, 'item1')
+        self.assertContains(response, 'item2')
 
 
 class ItemModelTest(TestCase):
