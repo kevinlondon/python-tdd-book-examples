@@ -17,7 +17,7 @@ class Site(object):
     def __init__(self, host, user):
         self.host = host
         self.user = user
-        self.folder = os.path.join("home", user, "sites", host)
+        self.folder = os.path.join("/", "home", user, "sites", host)
         self.source_folder = os.path.join(self.folder, "source")
         self.superlists_folder = os.path.join(self.source_folder, "superlists")
 
@@ -26,7 +26,7 @@ class Site(object):
             run('mkdir -p %s/%s' % (self.folder, subfolder))
 
     def get_latest_source(self):
-        if exists(self.source_folder + "/.git"):
+        if exists(self.folder + "/.git"):
             run("cd %s && git fetch" % self.source_folder)
         else:
             run("git clone %s %s" % (REPO_URL, self.source_folder))
