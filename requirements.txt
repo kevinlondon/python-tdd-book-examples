@@ -3,3 +3,4 @@ py==1.4.26
 pytest==2.6.4
 pytest-django==2.7.0
 selenium==2.44.0
+gunicorn==18.0

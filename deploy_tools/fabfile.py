@@ -26,7 +26,7 @@ class Site(object):
             run('mkdir -p %s/%s' % (self.folder, subfolder))
 
     def get_latest_source(self):
-        if exists(self.folder + "/.git"):
+        if exists(self.source_folder + "/.git"):
             run("cd %s && git fetch" % self.source_folder)
         else:
             run("git clone %s %s" % (REPO_URL, self.source_folder))
