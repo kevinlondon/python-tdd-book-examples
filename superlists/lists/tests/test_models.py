@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.core.exceptions import ValidationError
+
 from lists.models import Item, List
 
 
@@ -22,3 +24,10 @@ class ListAndItemModelsTest(TestCase):
         assert saved_items[0].list == lst
         assert saved_items[1].text == second_text
         assert saved_items[1].list == lst
+
+    def test_cannot_save_emepty_list_items(self):
+        lst = List.objects.create()
+        item = Item(list=lst, text="")
+        with self.assertRaises(ValidationError):
+            item.save()
+            item.full_clean()
