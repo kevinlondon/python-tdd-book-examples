@@ -48,6 +48,15 @@ class ListViewTest(TestCase):
         response = self.client.get("/lists/%d/" % correct_list.pk)
         assert response.context['list'] == correct_list
 
+    def test_validation_errors_end_up_on_lists_page(self):
+        lst = List.objects.create()
+        response = self.client.post("/lists/%d/" % lst.pk,
+                                    data={"item_text": ""})
+        assert response.status_code == 200
+        self.assertTemplateUsed(response, "list.html")
+        expected_error = escape("You can't have an empty list item")
+        self.assertContains(response, expected_error)
+
 
 class NewListTest(TestCase):
 
@@ -76,9 +85,6 @@ class NewListTest(TestCase):
         self.client.post("/lists/new", data={"item_text": ""})
         assert List.objects.count() == 0
         assert Item.objects.count() == 0
-
-
-class NewItemTest(TestCase):
 
     def test_can_save_a_POST_request_to_an_existing_list(self):
         other_list = List.objects.create()
