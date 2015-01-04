@@ -13,7 +13,7 @@ class NewVisitorTest(FunctionalTest):
         assert 'To-Do' in self.browser.title
 
         # She is invited to enter a to-do item.
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         assert inputbox.get_attribute("placeholder") == "Enter a to-do item"
 
         # She types "Buy peacock feathers" into a text box.
@@ -29,7 +29,7 @@ class NewVisitorTest(FunctionalTest):
 
         # There is still a text box that invites her to add another item.
         # She enters "Use peacock feathers to make a fly."
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         make_fly_text = "Use peacock feathers to make a fly."
         inputbox.send_keys(make_fly_text)
         inputbox.send_keys(Keys.ENTER)
@@ -51,7 +51,7 @@ class NewVisitorTest(FunctionalTest):
         assert make_fly_text not in page_text
 
         # Francis starts a new list by entering a new item.
-        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox = self.get_item_input_box()
         inputbox.send_keys("Buy milk")
         inputbox.send_keys(Keys.ENTER)
 
