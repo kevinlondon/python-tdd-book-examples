@@ -31,3 +31,8 @@ class ItemValidationTest(FunctionalTest):
         self.get_item_input_box().send_keys("Make tea\n")
         self.check_for_row_in_list_table("1: Buy milk")
         self.check_for_row_in_list_table("2: Make tea")
+
+    @unittest.skip
+    def test_cannot_add_duplicate_items(self):
+        "to be done"
+        pass
