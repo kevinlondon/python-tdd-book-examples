@@ -4,26 +4,18 @@ from django.core.exceptions import ValidationError
 from lists.models import Item, List
 
 
-class ListAndItemModelsTest(TestCase):
+class ItemModelTest(TestCase):
 
-    def test_saving_and_retrieving_items(self):
-        lst = List()
-        lst.save()
+    def test_default_text(self):
+        item = Item()
+        assert item.text == ""
 
-        first_text = "The first (ever) list item"
-        second_text = "Item the second"
-        first_item = Item.objects.create(text=first_text, list=lst)
-        second_item = Item.objects.create(text=second_text, list=lst)
-
-        saved_list = List.objects.first()
-        assert saved_list == lst
-
-        saved_items = Item.objects.all()
-        assert saved_items.count() == 2
-        assert saved_items[0].text == first_text
-        assert saved_items[0].list == lst
-        assert saved_items[1].text == second_text
-        assert saved_items[1].list == lst
+    def test_item_is_related_to_list(self):
+        lst = List.objects.create()
+        item = Item()
+        item.list = lst
+        item.save()
+        self.assertIn(item, lst.item_set.all())
 
     def test_cannot_save_emepty_list_items(self):
         lst = List.objects.create()
@@ -31,6 +23,34 @@ class ListAndItemModelsTest(TestCase):
         with self.assertRaises(ValidationError):
             item.save()
             item.full_clean()
+
+    def test_duplicate_items_are_invalid(self):
+        lst = List.objects.create()
+        Item.objects.create(list=lst, text="bla")
+        with self.assertRaises(ValidationError):
+            item = Item(list=lst, text="bla")
+            item.full_clean()
+
+    def test_can_save_same_item_to_different_lists(self):
+        lst = List.objects.create()
+        lst2 = List.objects.create()
+        Item.objects.create(list=lst, text="bla")
+        item = Item(list=lst2, text="bla")
+        item.full_clean()  # Should not raise error
+
+    def test_list_ordering(self):
+        lst = List.objects.create()
+        item1 = Item.objects.create(list=lst, text="i1")
+        item2 = Item.objects.create(list=lst, text="item 2")
+        item3 = Item.objects.create(list=lst, text="3")
+        assert list(Item.objects.all()) == [item1, item2, item3]
+
+    def test_string_rep(self):
+        item = Item(text="some text")
+        assert str(item) == "some text"
+
+
+class ListModelTest(TestCase):
 
     def test_absolute_url(self):
         lst = List.objects.create()
