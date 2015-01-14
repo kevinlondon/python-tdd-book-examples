@@ -1,4 +1,5 @@
 import unittest
+from unittest import skip
 from django.core.urlresolvers import resolve
 from django.utils.html import escape
 from django.test import TestCase
@@ -76,6 +77,16 @@ class ListViewTest(TestCase):
         self.assertIsInstance(response.context['form'], ItemForm)
         self.assertContains(response, 'name="text"')
 
+    @skip
+    def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
+        lst = List.objects.create()
+        item1 = Item.objects.create(list=lst, text="textey")
+        response = self.client.post("/lists/%d/" % lst.pk,
+                                    data={"text": "textey"})
+        expected_error = escape("You've already got this in your list")
+        self.assertContains(response, expected_error)
+        self.assertTemplateUsed(response, "list.html")
+        assert Item.objects.count() == 1
 
 class NewListTest(TestCase):
 
