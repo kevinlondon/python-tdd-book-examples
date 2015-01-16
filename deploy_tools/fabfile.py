@@ -17,22 +17,21 @@ class Site(object):
     def __init__(self, host, user):
         self.host = host
         self.user = user
-        self.folder = os.path.join("/", "home", user, "sites", host)
-        self.source_folder = os.path.join(self.folder, "source")
-        self.superlists_folder = os.path.join(self.source_folder, "superlists")
+        self.folder = os.path.join("/", "home", user, "sites", host, "source")
+        self.superlists_folder = os.path.join(self.folder, "superlists")
 
     def create_directory_structure(self):
         for subfolder in ("database", "static", "virtualenv", "source"):
             run('mkdir -p %s/%s' % (self.folder, subfolder))
 
     def get_latest_source(self):
-        if exists(self.source_folder + "/.git"):
-            run("cd %s && git fetch" % self.source_folder)
+        if exists(self.folder + "/.git"):
+            run("cd %s && git fetch" % self.folder)
         else:
-            run("git clone %s %s" % (REPO_URL, self.source_folder))
+            run("git clone %s %s" % (REPO_URL, self.folder))
 
         current_commit = local("git log -n 1 --format=%H", capture=True)
-        run("cd %s && git reset --hard %s" % (self.source_folder, current_commit))
+        run("cd %s && git reset --hard %s" % (self.folder, current_commit))
 
     def update(self):
         self.update_settings()
@@ -56,12 +55,12 @@ class Site(object):
         append(settings_path, "\nfrom .secret_key import SECRET_KEY")
 
     def update_virtualenv(self):
-        virtualenv_folder = self.source_folder + "/../virtualenv"
+        virtualenv_folder = self.folder + "/../virtualenv"
         if not exists(virtualenv_folder + "/bin/pip"):
             run("virtualenv --python=python3 %s" % virtualenv_folder)
 
         run("%s/bin/pip install -r %s/requirements.txt" % (
-                virtualenv_folder, self.source_folder
+                virtualenv_folder, self.folder
         ))
 
     def update_static_files(self):
