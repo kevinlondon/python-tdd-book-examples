@@ -27,6 +27,8 @@
         <div class="col-md-6 col-md-offset-3 jumbotron">
             <div class="text-center">
                 <h1>{% block header_text %}{% endblock %}</h1>
+
+                {% block list_form %}
                 <form method="POST" action="{% block form_action %}{% endblock %}">
                     {{ form.text }}
                     {% csrf_token %}
@@ -36,6 +38,7 @@
                         </div>
                     {% endif %}
                 </form>
+                {% endblock %}
             </div>
         </div>
     </div>
@@ -44,6 +47,13 @@
         <div class="col-md-6 col-md-offset-3">
             {% block table %}
             {% endblock table %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            {% block extra_content %}
+            {% endblock %}
         </div>
     </div>
 
