@@ -76,3 +76,11 @@ class NewListFormTest(unittest.TestCase):
         form.is_valid()
         form.save(owner=user)
         create_list_mock.assert_called_once_with(first_item_text='new item text', owner=user)
+
+    @patch('lists.forms.List.create_new')
+    def test_save_returns_new_list_object(self, create_list_mock):
+        user = Mock(is_authenticated=lambda: True)
+        form = NewListForm(data={'text': 'new item text'})
+        form.is_valid()
+        response = form.save(owner=user)
+        assert response == create_list_mock.return_value

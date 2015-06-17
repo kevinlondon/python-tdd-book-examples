@@ -25,3 +25,4 @@ class List(models.Model):
     def create_new(first_item_text, owner=None):
         lst = List.objects.create(owner=owner)
         Item.objects.create(text=first_item_text, list=lst)
+        return lst

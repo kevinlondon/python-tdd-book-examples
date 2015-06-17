@@ -1,5 +1,4 @@
 import unittest
-from unittest import skip
 from unittest.mock import Mock, patch
 from django.core.urlresolvers import resolve
 from django.utils.html import escape
@@ -146,7 +145,6 @@ class NewListViewIntegratedTest(TestCase):
         response = self.client.post('/lists/%d/' % correct_list.pk, data=data)
         self.assertRedirects(response, '/lists/%d/' % correct_list.pk)
 
-    @unittest.skip
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         request = HttpRequest()
         request.user = User.objects.create(email='a@b.com')
