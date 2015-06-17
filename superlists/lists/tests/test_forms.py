@@ -1,8 +1,12 @@
+import unittest
+from unittest.mock import patch, Mock
+from django.test import TestCase
+
 from django.test import TestCase
 from lists.models import Item, List
 from lists.forms import (
     DUPLICATE_ITEM_ERROR, EMPTY_ITEM_ERROR,
-    ExistingListItemForm, ItemForm
+    ExistingListItemForm, ItemForm, NewListForm
 )
 
 
@@ -53,3 +57,22 @@ class ExistingListItemFormTest(TestCase):
         form = ExistingListItemForm(for_list=lst, data={"text": "hi"})
         new_item = form.save()
         assert new_item == Item.objects.all().first()
+
+
+class NewListFormTest(unittest.TestCase):
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_from_data_if_not_authed(self, create_list_mock):
+        user = Mock(is_authenticated=lambda: False)
+        form = NewListForm(data={'text': 'new item text'})
+        form.is_valid()
+        form.save(owner=user)
+        create_list_mock.assert_called_once_with(first_item_text='new item text')
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_with_owner_is_authed(self, create_list_mock):
+        user = Mock(is_authenticated=lambda: True)
+        form = NewListForm(data={'text': 'new item text'})
+        form.is_valid()
+        form.save(owner=user)
+        create_list_mock.assert_called_once_with(first_item_text='new item text', owner=user)
