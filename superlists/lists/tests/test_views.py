@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from lists.views import home_page, new_list, new_list2
+from lists.views import home_page, new_list
 from lists.models import Item, List
 from lists.forms import (
     ItemForm, EMPTY_ITEM_ERROR,
@@ -103,47 +103,9 @@ class NewListViewIntegratedTest(TestCase):
         new_item = Item.objects.first()
         assert new_item.text == "A new list item"
 
-    def test_redirects_after_POST(self):
-        data = {"text": "A new list item"}
-        response = self.client.post("/lists/new", data=data)
-        new_list = List.objects.first()
-        self.assertRedirects(response, '/lists/%d/' % new_list.pk)
-
-    def test_for_invalid_input_renders_home_template(self):
-        response = self.client.post("/lists/new", data={"text": ""})
-        assert response.status_code == 200
-        self.assertTemplateUsed(response, "home.html")
-
     def test_validation_errors_are_sent_back_to_home_page_template(self):
         response = self.client.post("/lists/new", data={"text": ""})
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
-
-    def test_for_invalid_input_passes_form_to_template(self):
-        response = self.client.post("/lists/new", data={"text": ""})
-        self.assertIsInstance(response.context['form'], ItemForm)
-
-    def test_invalid_list_items_arent_saved(self):
-        self.client.post("/lists/new", data={"text": ""})
-        assert List.objects.count() == 0
-        assert Item.objects.count() == 0
-
-    def test_can_save_a_POST_request_to_an_existing_list(self):
-        other_list = List.objects.create()
-        correct_list = List.objects.create()
-
-        data = {"text": "A new item for an existing list"}
-        self.client.post('/lists/%d/' % correct_list.pk, data=data)
-        assert Item.objects.count() == 1
-        new_item = Item.objects.first()
-        assert new_item.text == "A new item for an existing list"
-        assert new_item.list == correct_list
-
-    def test_redirects_to_list_view(self):
-        other_list = List.objects.create()
-        correct_list = List.objects.create()
-        data = {"text": "A new item for an existing list"}
-        response = self.client.post('/lists/%d/' % correct_list.pk, data=data)
-        self.assertRedirects(response, '/lists/%d/' % correct_list.pk)
 
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         request = HttpRequest()
@@ -163,13 +125,13 @@ class NewListViewUnitTest(unittest.TestCase):
         self.request.user = Mock()
 
     def test_passes_POST_data_to_new_list_form(self, new_list_form_mock):
-        new_list2(self.request)
+        new_list(self.request)
         new_list_form_mock.assert_called_once_with(data=self.request.POST)
 
     def test_saves_form_with_owner_if_form_valid(self, new_list_form_mock):
         mock_form = new_list_form_mock.return_value
         mock_form.is_valid.return_value = True
-        new_list2(self.request)
+        new_list(self.request)
         mock_form.save.assert_called_once_with(owner=self.request.user)
 
     @patch('lists.views.redirect')
@@ -179,7 +141,7 @@ class NewListViewUnitTest(unittest.TestCase):
         mock_form = new_list_form_mock.return_value
         mock_form.is_valid.return_value = True
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         assert response == redirect_mock.return_value
         redirect_mock.assert_called_once_with(mock_form.save.return_value)
@@ -191,7 +153,7 @@ class NewListViewUnitTest(unittest.TestCase):
         mock_form = new_list_form_mock.return_value
         mock_form.is_valid.return_value = False
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         assert response == render_mock.return_value
         render_mock.assert_called_once_with(self.request, 'home.html', {'form': mock_form})
@@ -199,7 +161,7 @@ class NewListViewUnitTest(unittest.TestCase):
     def test_does_not_save_if_form_invalid(self, new_list_form_mock):
         mock_form = new_list_form_mock.return_value
         mock_form.is_valid.return_value = False
-        new_list2(self.request)
+        new_list(self.request)
         assert not mock_form.save.called
 
 
